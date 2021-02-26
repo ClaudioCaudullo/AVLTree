@@ -1,5 +1,4 @@
-// C++ program of AVL tree that 
-// handles duplicates 
+//Avl tree with duplicate keys
 #include <stdio.h> 
 #include <stdlib.h> 
 
