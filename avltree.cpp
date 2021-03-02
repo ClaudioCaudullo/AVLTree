@@ -6,9 +6,9 @@ class Node
 { 
 	public: 
 	    int key; 
+        int height; 
 	    Node *left; 
 	    Node *right; 
-	    int height; 
 }; 
 
 // Dato un nodo,ottengo la sua altezza
@@ -31,46 +31,46 @@ int max(int a, int b)
    i puntatori destri e sinistri a NULL*/
 Node* newNode(int key) 
 { 
-	Node* node = new Node(); 
-	node->key = key; 
-	node->left = NULL; 
-	node->right = NULL; 
-	node->height = 1; // l'altezza di un nuovo nodo è 1
-	return(node); 
+	Node* n = new Node(); 
+	n->key = key; 
+    n->height = 1; // l'altezza di un nuovo nodo è 1
+	n->left = NULL; 
+	n->right = NULL; 
+	return(n); 
 } 
 
-// Rotazione a destra del sottoalbero con radice y  
-Node *rightRotate(Node *y) 
+// Rotazione a destra del sottoalbero con radice n  
+Node *rightRotate(Node *n) 
 { 
-	Node *x = y->left; 
-	Node *T2 = x->right; 
+	Node *x = n->left; 
+	Node *temp = x->right; 
 
 	// Rotazione a destra
-	x->right = y; 
-	y->left = T2; 
+	x->right = n; 
+	n->left = temp; 
 
 	// Aggiorno le altezze
-	y->height = max(getHeight(y->left),getHeight(y->right)) + 1; 
+	n->height = max(getHeight(n->left),getHeight(n->right)) + 1; 
 	x->height = max(getHeight(x->left),getHeight(x->right)) + 1; 
 
 	return x; 
 } 
 
-// Rotazione a sinistra del sottoalbero con radice x 
-Node *leftRotate(Node *x) 
+// Rotazione a sinistra del sottoalbero con radice n
+Node *leftRotate(Node *n) 
 { 
-	Node *y = x->right; 
-	Node *T2 = y->left; 
+	Node *x = n->right; 
+	Node *temp = x->left; 
 
 	// Ratazione a sinistra
-	y->left = x; 
-	x->right = T2; 
+	x->left = n; 
+	n->right = temp; 
 
 	// Aggiorno le altezze 
+	n->height = max(getHeight(n->left),getHeight(n->right)) + 1; 
 	x->height = max(getHeight(x->left),getHeight(x->right)) + 1; 
-	y->height = max(getHeight(y->left),getHeight(y->right)) + 1; 
 
-	return y; 
+	return x; 
 } 
 
 // Prendo il fattore di bilancio del nodo n 
@@ -81,61 +81,61 @@ int getBalance(Node *n)
 } 
 
 // Inserimento di una chiave nell'albero 
-// con radice node  
-Node* insert(Node* node, int key) 
+// con radice n 
+Node* insert(Node* n, int key) 
 { 
 	// BST 
-	if (node == NULL) return(newNode(key)); 
+	if (n == NULL) return(newNode(key)); 
 
-	if (key < node->key) node->left = insert(node->left, key); 
-	else if (key > node->key) node->right = insert(node->right, key); 
-	else return node; //non inserisco perchè non ci possono essere chiavi uguali
+	if (key < n->key) n->left = insert(n->left, key); 
+	else if (key > n->key) n->right = insert(n->right, key); 
+	else return n; //non inserisco perchè non ci possono essere chiavi uguali
 
-	// AGGIORNO L'ALTEZZA DEL NODO APPENA INSERITO
-	node->height = 1 + max(getHeight(node->left),getHeight(node->right)); 
+	// Aggiorno l'altezza del nodo appena inserito
+	n->height = 1 + max(getHeight(n->left),getHeight(n->right)); 
 
-	/* Prendo il fattore di bilancio dell'antenato del nuovo nodo 
-     per vedere dove quest'ultimo non è bilanciato*/
-	int balance = getBalance(node); 
+	// Prendo il fattore di bilancio dell'antenato del nuovo nodo 
+    // per vedere dove quest'ultimo non è bilanciato
+	int balance = getBalance(n); 
 
 	// Se il nodo non è bilanciato , ci troviamo in uno di questi 4 casi
 
 	// Left Left Case 
-	if (balance > 1 && key < node->left->key) 
-		return rightRotate(node); 
+	if (balance > 1 && key < n->left->key) 
+		return rightRotate(n); 
 
 	// Right Right Case 
-	if (balance < -1 && key > node->right->key) 
-		return leftRotate(node); 
+	if (balance < -1 && key > n->right->key) 
+		return leftRotate(n); 
 
 	// Left Right Case 
-	if (balance > 1 && key > node->left->key) 
+	if (balance > 1 && key > n->left->key) 
 	{ 
-		node->left = leftRotate(node->left); 
-		return rightRotate(node); 
+		n->left = leftRotate(n->left); 
+		return rightRotate(n); 
 	} 
 
 	// Right Left Case 
-	if (balance < -1 && key < node->right->key) 
+	if (balance < -1 && key < n->right->key) 
 	{ 
-		node->right = rightRotate(node->right); 
-		return leftRotate(node); 
+		n->right = rightRotate(n->right); 
+		return leftRotate(n); 
 	} 
 
-	return node; 
+	return n; 
 } 
 
 // Cerco il nodo con la key minima 
-Node * minValueNode(Node* node)  
+Node * minValueNode(Node* n)  
 {  
-    Node* current = node;  
+    Node* temp = n;  
   
-    /* non cerco in tutto l'albero ma arrivo 
-    fino all'estremo nodo a sinistra */
-    while (current->left != NULL)  
-        current = current->left;  
+    // non cerco in tutto l'albero ma arrivo 
+    // fino all'estremo nodo a sinistra 
+    while (temp->left != NULL)  
+        temp = temp->left;  
   
-    return current;  
+    return temp;  
 }  
   
 // Classica delete di un nodo 
@@ -152,7 +152,7 @@ Node* deleteNode(Node* root, int key)
     if ( key < root->key ) root->left = deleteNode(root->left, key);  
   
     // Al contrario, se la chiave è maggiore della root 
-    // allora dovrò cercare dal sottoalbero detro  
+    // allora dovrò cercare dal sottoalbero destro  
     else if( key > root->key ) root->right = deleteNode(root->right, key);  
   
     // Se infine la chiave è uguale a quella della root
@@ -246,42 +246,42 @@ int main()
 Node *root = NULL;  
   
 
-    root = insert(root, 9);  
-    root = insert(root, 5);  
-    root = insert(root, 10);  
+    root = insert(root, 7);  
+    root = insert(root, 4);  
+    root = insert(root, 8);  
     root = insert(root, 0);  
     root = insert(root, 6);  
-    root = insert(root, 11);  
+    root = insert(root, 9);  
     root = insert(root, -1);  
-    root = insert(root, 1);  
     root = insert(root, 2);  
+    root = insert(root, 3);  
   
     /* L'AVL Tree dovrebbe essere 
-         9  
+         7  
         / \  
-        1 10  
+        2 8  
        / \ \  
-       0 5 11  
+       0 4 9  
       / / \  
-     -1 2 6  
+     -1 3 6  
     */
   
     cout << "Preorder : \n";  
     preOrder(root);  
   
-    root = deleteNode(root, 10);  
+    root = deleteNode(root, 8);  
   
-    /* L'AVL Tree dopo la cancellazione del nodo 10  
-         1  
+    /* L'AVL Tree dopo la cancellazione del nodo 8  
+         2  
         / \  
-       0   9  
+       0   7  
       /   / \  
-     -1  5  11  
+     -1  4  9  
         / \  
-        2 6  
+        3 6  
     */
   
-    cout << "\nPreorder dopo l'eliminazione di 10 : \n";  
+    cout << "\nPreorder dopo l'eliminazione di 8 : \n";  
     preOrder(root);  
   
     return 0;  
