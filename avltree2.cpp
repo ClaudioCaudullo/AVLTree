@@ -1,29 +1,32 @@
-//Avl tree with duplicate keys
+// AVL Tree con chiavi duplicate
+#include <iostream>
 #include <stdio.h> 
 #include <stdlib.h> 
+
+using namespace std;
 
 // Struttura di un nodo dell'albero 
 struct node { 
 	int key; 
-	struct node* left; 
-	struct node* right; 
 	int height; 
 	int count; 
+	struct node* left; 
+	struct node* right; 
 }; 
 
 // Metodo che restituisce l'altezza dell'albero
-int height(struct node* N) 
+int getHeight(struct node* n) 
 { 
-	if (N == NULL) 
-		return 0; 
-	return N->height; 
+	if (n == NULL) return 0; 
+	return n->height; 
 } 
 
 // ritorno l'intero più grande
 // dai due interi in input
 int max(int a, int b) 
 { 
-	return (a > b) ? a : b; 
+    if(a>b) return a;
+    return b;
 } 
 
 /* Funzione di utilità che crea
@@ -31,120 +34,119 @@ int max(int a, int b)
    i puntatori destri e sinistri a NULL*/
 struct node* newNode(int key) 
 { 
-	struct node* node = (struct node*) 
-		malloc(sizeof(struct node)); 
-	node->key = key; 
-	node->left = NULL; 
-	node->right = NULL; 
-	node->height = 1; // l'altezza di un nuovo nodo è 1
-	node->count = 1; // prima apparizione dell chiave nell'albero
-	return (node); 
+	struct node* n = (struct node*) malloc(sizeof(struct node)); 
+	n->key = key; 
+	n->height = 1; // l'altezza di un nuovo nodo è 1
+	n->count = 1; // prima apparizione dell chiave nell'albero
+	n->left = NULL; 
+	n->right = NULL; 
+	return (n); 
 } 
 
-// Rotazione a destra del sottoalbero con radice y   
-struct node* rightRotate(struct node* y) 
+// Rotazione a destra del sottoalbero con radice n  
+struct node* rightRotate(struct node *n) 
 { 
-	struct node* x = y->left; 
-	struct node* T2 = x->right; 
+	struct node *x = n->left; 
+	struct node *temp = x->right; 
 
 	// Rotazione a destra
-	x->right = y; 
-	y->left = T2; 
+	x->right = n; 
+	n->left = temp; 
 
 	// Aggiorno le altezze
-	y->height = max(height(y->left), height(y->right)) + 1; 
-	x->height = max(height(x->left), height(x->right)) + 1; 
+	n->height = max(getHeight(n->left),getHeight(n->right)) + 1; 
+	x->height = max(getHeight(x->left),getHeight(x->right)) + 1; 
 
 	return x; 
 } 
 
-// Rotazione a sinistra del sottoalbero con radice x  
-struct node* leftRotate(struct node* x) 
+// Rotazione a sinistra del sottoalbero con radice n
+struct node* leftRotate(struct node *n) 
 { 
-	struct node* y = x->right; 
-	struct node* T2 = y->left; 
+	struct node *x = n->right; 
+	struct node *temp = x->left; 
 
 	// Ratazione a sinistra
-	y->left = x; 
-	x->right = T2; 
-	// Aggiorno le altezze 
-	x->height = max(height(x->left), height(x->right)) + 1; 
-	y->height = max(height(y->left), height(y->right)) + 1; 
+	x->left = n; 
+	n->right = temp; 
 
-	return y; 
+	// Aggiorno le altezze 
+	n->height = max(getHeight(n->left),getHeight(n->right)) + 1; 
+	x->height = max(getHeight(x->left),getHeight(x->right)) + 1; 
+
+	return x; 
 } 
 
 // Prendo il fattore di bilancio del nodo n  
-int getBalance(struct node* N) 
+int getBalance(struct node* n) 
 { 
-	if (N == NULL) 
-		return 0; 
-	return height(N->left) - height(N->right); 
+	if (n == NULL) return 0; 
+	return getHeight(n->left) - getHeight(n->right); 
 } 
 
 // Inserimento di una chiave nell'albero 
 // con radice node 
-struct node* insert(struct node* node, int key) 
+struct node* insert(struct node* n, int key) 
 { 
 	// BST
-	if (node == NULL) 
-		return (newNode(key)); 
+	if (n == NULL) return (newNode(key)); 
 
 	// Se già la chiave è presente, ne aumento il count
-	if (key == node->key) { 
-		(node->count)++; 
-		return node; 
+	if (key == n->key) 
+	{ 
+		(n->count)++; 
+		return n; 
 	} 
 
 	// altrimenti la inserisco
-	if (key < node->key) 
-		node->left = insert(node->left, key); 
+	if (key < n->key) 
+		n->left = insert(n->left, key); 
 	else
-		node->right = insert(node->right, key); 
+		n->right = insert(n->right, key); 
 
-	// AGGIORNO L'ALTEZZA DEL NODO APPENA INSERITO
-	node->height = max(height(node->left), height(node->right)) + 1; 
+	// Aggiorno l'altezza del nodo appena inserito
+	n->height = max(getHeight(n->left), getHeight(n->right)) + 1; 
 
-	/* Prendo il fattore di bilancio dell'antenato del nuovo nodo 
-    per vedere dove quest'ultimo non è bilanciato*/
-	int balance = getBalance(node); 
+	// Prendo il fattore di bilancio dell'antenato del nuovo nodo 
+    // per vedere dove quest'ultimo non è bilanciato
+	int balance = getBalance(n); 
 
 	// Se il nodo non è bilanciato , ci troviamo in uno di questi 4 casi 
 
 	// Left Left Case 
-	if (balance > 1 && key < node->left->key) 
-		return rightRotate(node); 
+	if (balance > 1 && key < n->left->key) 
+		return rightRotate(n); 
 
 	// Right Right Case 
-	if (balance < -1 && key > node->right->key) 
-		return leftRotate(node); 
+	if (balance < -1 && key > n->right->key) 
+		return leftRotate(n); 
 
 	// Left Right Case 
-	if (balance > 1 && key > node->left->key) { 
-		node->left = leftRotate(node->left); 
-		return rightRotate(node); 
+	if (balance > 1 && key > n->left->key) { 
+		n->left = leftRotate(n->left); 
+		return rightRotate(n); 
 	} 
 
 	// Right Left Case 
-	if (balance < -1 && key < node->right->key) { 
-		node->right = rightRotate(node->right); 
-		return leftRotate(node); 
+	if (balance < -1 && key < n->right->key) { 
+		n->right = rightRotate(n->right); 
+		return leftRotate(n); 
 	} 
 
-	return node; 
+	return n; 
 } 
 
 // Cerco il nodo con la key minima 
-struct node* minValueNode(struct node* node) 
+struct node* minValueNode(struct node* n) 
 { 
-	struct node* current = node; 
+	struct node* temp = n; 
 
-    /* non cerco in tutto l'albero ma arrivo 
-    fino all'estremo nodo a sinistra */
-	while (current->left != NULL) 
-		current = current->left; 
+    // non cerco in tutto l'albero ma arrivo 
+    // fino all'estremo nodo a sinistra 
+	while (temp->left != NULL) 
+		temp = temp->left; 
 
-	return current; 
+	return temp; 
 } 
 
 // Classica delete di un nodo 
@@ -172,14 +174,16 @@ struct node* deleteNode(struct node* root, int key)
 	else { 
 		// Se il nodo è presente più di una volta,
 		// decremento semplicemente il count.
-		if (root->count > 1) { 
+		if (root->count > 1) 
+		{ 
 			(root->count)--; 
 			return root; 
 		} 
 		// Altrimenti elimino il nodo
 
         // nodo con al massimo un figlio
-		if ((root->left == NULL) || (root->right == NULL)) { 
+		if ((root->left == NULL) || (root->right == NULL)) 
+		{ 
 			struct node* temp = root->left ? root->left : root->right; 
   
             // Nodo senza figli  
@@ -208,15 +212,14 @@ struct node* deleteNode(struct node* root, int key)
 
     // Se il nodo aveva solo la radice
     // ritorno null  
-	if (root == NULL) 
-		return root; 
+	if (root == NULL) return root; 
 
   
     // Aggiorno l'altezza del nodo corrente
-	root->height = max(height(root->left), height(root->right)) + 1; 
+	root->height = max(getHeight(root->left), getHeight(root->right)) + 1; 
 
-    /* Prendo il fattore di bilancio del nuovo nodo 
-       per vedere se e dove quest'ultimo non è bilanciato */
+    // Prendo il fattore di bilancio del nuovo nodo 
+    //   per vedere se e dove quest'ultimo non è bilanciato 
 	int balance = getBalance(root); 
 
     // Come prima, se il nodo non è bilanciato 
@@ -251,7 +254,7 @@ struct node* deleteNode(struct node* root, int key)
 void preOrder(struct node* root) 
 { 
 	if (root != NULL) { 
-		printf("%d(%d) ", root->key, root->count); 
+		cout<<root->key<<"("<<root->count<<") "; 
 		preOrder(root->left); 
 		preOrder(root->right); 
 	} 
@@ -261,20 +264,20 @@ int main()
 { 
 	struct node* root = NULL; 
 
-	root = insert(root, 9); 
-	root = insert(root, 5); 
-	root = insert(root, 10); 
-	root = insert(root, 5); 
-	root = insert(root, 9); 
+	root = insert(root, 12); 
+	root = insert(root, 1); 
+	root = insert(root, 14); 
+	root = insert(root, 1); 
+	root = insert(root, 12); 
 	root = insert(root, 7); 
-	root = insert(root, 17); 
+	root = insert(root, 20); 
 
-	printf("Pre order: \n"); 
+	cout<<"Pre order: \n"; 
 	preOrder(root); 
 
-	root = deleteNode(root, 9); 
+	root = deleteNode(root, 12); 
 
-	printf("\nPre order dopo l'eliminazione del 9 \n"); 
+	cout<<"\nPre order dopo l'eliminazione del 12: \n"; 
 	preOrder(root); 
 
 	return 0; 
